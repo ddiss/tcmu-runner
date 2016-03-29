@@ -9,6 +9,7 @@ set(tcmu-runner_HANDLER_PATH "${CMAKE_INSTALL_LIBDIR}/tcmu-runner")
 
 option(with-glfs "build Gluster glfs handler" true)
 option(with-qcow "build qcow handler" true)
+option(with-elasto "build Elasto handler" false)
 
 find_library(LIBNL_LIB nl-3)
 find_library(LIBNL_GENL_LIB nl-genl-3)
@@ -149,6 +150,27 @@ if (with-qcow)
 	  )
 	install(TARGETS handler_qcow DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcmu-runner)
 endif (with-qcow)
+
+if (with-elasto)
+	pkg_check_modules(ELASTO REQUIRED elasto_file)
+
+	# Stuff for building the Elasto handler
+	add_library(handler_elasto
+	  SHARED
+	  elasto.c
+	  )
+	set_target_properties(handler_elasto
+	  PROPERTIES
+	  PREFIX ""
+	  )
+	target_include_directories(handler_elasto
+	  PUBLIC ${ELASTO_INCLUDE_DIRS}
+	  )
+	target_link_libraries(handler_elasto
+	  ${ELASTO_LIBRARIES}
+	  )
+	install(TARGETS handler_elasto DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcmu-runner)
+endif (with-elasto)
 
 # stamp out a header file to pass some of the CMake settings
 # to the source code
